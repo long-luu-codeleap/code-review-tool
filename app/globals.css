@@ -125,6 +125,28 @@
   }
 }
 
+/* Dark Mode Glassmorphic Enhancements */
+.dark {
+  /* Subtle background pattern */
+  body {
+    background-image: radial-gradient(
+      circle at 25% 25%,
+      oklch(0.15 0 0) 0%,
+      transparent 50%
+    );
+  }
+
+  /* Card enhancements */
+  [class*="rounded-lg"][class*="border"] {
+    background: oklch(0.18 0 0 / 0.6);
+    backdrop-filter: blur(16px);
+    border: 1px solid oklch(0.3 0 0);
+    box-shadow:
+      0 2px 4px 0 rgb(0 0 0 / 0.3),
+      0 0 0 1px oklch(0.25 0 0) inset;
+  }
+}
+
 @media print {
   .no-print {
     display: none !important;
