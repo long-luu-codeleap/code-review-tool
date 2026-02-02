@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nstyle: enhance dark mode base colors with blue-tinted palette\n\n- Lighter background for better depth perception\n- Blue-tinted borders and accents \\(indigo oklch\\)\n- Improved contrast for foreground elements\n- Foundation for glassmorphic effects\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nstyle: add glassmorphic effects to cards in dark mode\n\n- Backdrop blur on card surfaces\n- Multi-layer shadows for depth\n- Subtle radial background pattern\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "WebSearch",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nstyle: enhance logo visibility in dark mode\n\n- Apply brightness and contrast filters\n- Add subtle blue glow effect\n- Enhance header with shadow for depth\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfix: add missing hover effect to logo link\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfix: use drop-shadow instead of text-shadow for logo glow\n\n- text-shadow doesn''t work on Image elements\n- drop-shadow filter works on SVG shapes\n- Add transition-all for smooth dark mode toggle\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nstyle: redesign tabs as glassmorphic segmented control\n\n- Container with blur and inset shadow\n- Clear active state with blue accent\n- Smooth hover transitions\n- Improved font weights for clarity\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)"
+    ]
+  }
+}
