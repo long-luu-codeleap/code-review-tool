@@ -34,7 +34,9 @@ export function EvaluationForm() {
         sessionStorage.setItem("evaluationResult", JSON.stringify(result));
         router.push("/results");
       } catch {
-        toast.error("Failed to store results. The evaluation may be too large.");
+        toast.error(
+          "Failed to store results. The evaluation may be too large.",
+        );
       }
     }
   }
@@ -83,7 +85,7 @@ export function EvaluationForm() {
         onClick={handleEvaluate}
         disabled={!sourceData || isLoading}
         size="lg"
-        className="w-full"
+        className="w-full cursor-pointer"
       >
         {isLoading ? (
           "Evaluating..."

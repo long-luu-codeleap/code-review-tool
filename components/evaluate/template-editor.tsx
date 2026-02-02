@@ -32,7 +32,7 @@ export function TemplateEditor({
     <Card>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CardHeader className="pb-3">
-          <CollapsibleTrigger className="flex w-full items-center justify-between">
+          <CollapsibleTrigger className="flex w-full items-center justify-between cursor-pointer">
             <CardTitle className="flex items-center gap-2 text-lg">
               {icon}
               {title}
@@ -49,7 +49,7 @@ export function TemplateEditor({
             <Textarea
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              className="min-h-[300px] font-mono text-sm"
+              className="min-h-75 font-mono text-sm"
             />
             <div className="flex justify-end">
               <Button

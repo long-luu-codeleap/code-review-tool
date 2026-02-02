@@ -28,8 +28,8 @@ function cleanJsonResponse(text: string): string {
 
   // Try to extract JSON if wrapped in other text
   // Look for the outermost { ... } braces
-  const firstBrace = cleaned.indexOf('{');
-  const lastBrace = cleaned.lastIndexOf('}');
+  const firstBrace = cleaned.indexOf("{");
+  const lastBrace = cleaned.lastIndexOf("}");
 
   if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
     cleaned = cleaned.substring(firstBrace, lastBrace + 1);
@@ -44,20 +44,20 @@ function attemptJsonRepair(jsonString: string): string {
 
   // Fix unescaped backslashes in Windows paths
   // Convert single backslashes to double backslashes (except for valid escape sequences)
-  repaired = repaired.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+  repaired = repaired.replace(/\\(?!["\\/bfnrtu])/g, "\\\\");
 
   return repaired;
 }
 
-function parseJsonWithContext(jsonString: string, context: string): any {
+function parseJsonWithContext<T>(jsonString: string, context: string): T {
   try {
-    return JSON.parse(jsonString);
+    return JSON.parse(jsonString) as T;
   } catch (error) {
     // Try to repair common JSON issues
     try {
       const repaired = attemptJsonRepair(jsonString);
-      return JSON.parse(repaired);
-    } catch (repairError) {
+      return JSON.parse(repaired) as T;
+    } catch {
       // Repair failed, provide detailed error context
       const errorMsg = error instanceof Error ? error.message : String(error);
       const match = errorMsg.match(/position (\d+)/);
@@ -67,33 +67,36 @@ function parseJsonWithContext(jsonString: string, context: string): any {
         const start = Math.max(0, position - 100);
         const end = Math.min(jsonString.length, position + 100);
         const snippet = jsonString.substring(start, end);
-        const pointer = ' '.repeat(Math.min(position - start, 100)) + '^';
+        const pointer = " ".repeat(Math.min(position - start, 100)) + "^";
 
         throw new Error(
           `${context} - JSON parsing failed: ${errorMsg}\n\n` +
-          `Snippet near error:\n${snippet}\n${pointer}\n\n` +
-          `This is likely an AI response formatting issue. Please retry the evaluation.`
+            `Snippet near error:\n${snippet}\n${pointer}\n\n` +
+            `This is likely an AI response formatting issue. Please retry the evaluation.`,
         );
       }
 
       throw new Error(
         `${context} - JSON parsing failed: ${errorMsg}\n` +
-        `This is likely an AI response formatting issue. Please retry the evaluation.`
+          `This is likely an AI response formatting issue. Please retry the evaluation.`,
       );
     }
   }
 }
 
 export async function runEvaluation(
-  input: EvaluationInput
+  input: EvaluationInput,
 ): Promise<EvaluationResult> {
   // Pass 1: Structure Scan
   const pass1Raw = await generateContent(
     SYSTEM_PROMPT,
-    buildPass1Prompt(input.sourceCode)
+    buildPass1Prompt(input.sourceCode),
   );
   const pass1Cleaned = cleanJsonResponse(pass1Raw);
-  const pass1: Pass1Output = parseJsonWithContext(pass1Cleaned, "Pass 1 (Structure Scan)");
+  const pass1 = parseJsonWithContext<Pass1Output>(
+    pass1Cleaned,
+    "Pass 1 (Structure Scan)",
+  );
 
   // Pass 2: Requirement Review
   const pass2Raw = await generateContent(
@@ -101,11 +104,14 @@ export async function runEvaluation(
     buildPass2Prompt(
       input.sourceCode,
       input.requirementTemplate,
-      JSON.stringify(pass1, null, 2)
-    )
+      JSON.stringify(pass1, null, 2),
+    ),
   );
   const pass2Cleaned = cleanJsonResponse(pass2Raw);
-  const pass2: Pass2Output = parseJsonWithContext(pass2Cleaned, "Pass 2 (Requirement Review)");
+  const pass2 = parseJsonWithContext<Pass2Output>(
+    pass2Cleaned,
+    "Pass 2 (Requirement Review)",
+  );
 
   // Pass 3: Final Scoring
   const pass3Raw = await generateContent(
@@ -113,8 +119,8 @@ export async function runEvaluation(
     buildPass3Prompt(
       JSON.stringify(pass1, null, 2),
       JSON.stringify(pass2, null, 2),
-      input.resultTemplate
-    )
+      input.resultTemplate,
+    ),
   );
 
   // Split markdown and JSON
@@ -126,20 +132,28 @@ export async function runEvaluation(
 
   if (delimiterIndex !== -1) {
     markdownReport = pass3Raw.substring(0, delimiterIndex).trim();
-    const jsonPart = pass3Raw.substring(delimiterIndex + delimiter.length).trim();
+    const jsonPart = pass3Raw
+      .substring(delimiterIndex + delimiter.length)
+      .trim();
     const pass3Cleaned = cleanJsonResponse(jsonPart);
-    pass3Json = parseJsonWithContext(pass3Cleaned, "Pass 3 (Final Scoring)");
+    pass3Json = parseJsonWithContext<Omit<Pass3Output, "markdownReport">>(
+      pass3Cleaned,
+      "Pass 3 (Final Scoring)",
+    );
   } else {
     // Fallback: try to find JSON at the end
     const lastBrace = pass3Raw.lastIndexOf("}");
     const firstBrace = pass3Raw.lastIndexOf(
       "{",
-      pass3Raw.lastIndexOf('"sectionScores"')
+      pass3Raw.lastIndexOf('"sectionScores"'),
     );
     if (firstBrace !== -1 && lastBrace !== -1) {
       markdownReport = pass3Raw.substring(0, firstBrace).trim();
       const fallbackJson = pass3Raw.substring(firstBrace, lastBrace + 1);
-      pass3Json = parseJsonWithContext(fallbackJson, "Pass 3 (Final Scoring - Fallback)");
+      pass3Json = parseJsonWithContext<Omit<Pass3Output, "markdownReport">>(
+        fallbackJson,
+        "Pass 3 (Final Scoring - Fallback)",
+      );
     } else {
       markdownReport = pass3Raw;
       pass3Json = {

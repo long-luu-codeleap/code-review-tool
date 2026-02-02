@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,14 +20,17 @@ export function SourceInput({
   onSourceLoaded,
   onError,
 }: SourceInputProps) {
-  const [activeTab, setActiveTab] = useState<string>("github");
+  // Initialize tab based on sourceData if available, otherwise default to "github"
+  const [activeTab, setActiveTab] = useState<string>(
+    sourceData?.loadMethod ?? "github",
+  );
 
-  // Auto-switch to the tab that loaded the files
-  useEffect(() => {
-    if (sourceData?.loadMethod) {
-      setActiveTab(sourceData.loadMethod);
-    }
-  }, [sourceData?.loadMethod]);
+  // Handle source loaded and auto-switch tab
+  const handleSourceLoaded = (data: SourceData) => {
+    setActiveTab(data.loadMethod);
+    onSourceLoaded(data);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -53,14 +56,14 @@ export function SourceInput({
           <TabsContent value="github">
             <GitHubUrlInput
               sourceData={sourceData}
-              onSourceLoaded={onSourceLoaded}
+              onSourceLoaded={handleSourceLoaded}
               onError={onError}
             />
           </TabsContent>
           <TabsContent value="folder">
             <FolderUploadInput
               sourceData={sourceData}
-              onSourceLoaded={onSourceLoaded}
+              onSourceLoaded={handleSourceLoaded}
               onError={onError}
             />
           </TabsContent>

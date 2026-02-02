@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Github, CheckCircle2, FileText, RefreshCw } from "lucide-react";
+import {
+  Loader2,
+  Github,
+  CheckCircle2,
+  FileText,
+  RefreshCw,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { SourceData } from "@/lib/types";
@@ -12,7 +18,11 @@ interface GitHubUrlInputProps {
   onError: (error: string) => void;
 }
 
-export function GitHubUrlInput({ sourceData, onSourceLoaded, onError }: GitHubUrlInputProps) {
+export function GitHubUrlInput({
+  sourceData,
+  onSourceLoaded,
+  onError,
+}: GitHubUrlInputProps) {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [showInput, setShowInput] = useState(!sourceData);
@@ -54,7 +64,8 @@ export function GitHubUrlInput({ sourceData, onSourceLoaded, onError }: GitHubUr
               {sourceData.repoInfo && (
                 <p className="mt-1 text-xs text-muted-foreground">
                   From {sourceData.repoInfo.owner}/{sourceData.repoInfo.repo}
-                  {sourceData.repoInfo.branch && ` (${sourceData.repoInfo.branch})`}
+                  {sourceData.repoInfo.branch &&
+                    ` (${sourceData.repoInfo.branch})`}
                 </p>
               )}
             </div>
@@ -77,7 +88,10 @@ export function GitHubUrlInput({ sourceData, onSourceLoaded, onError }: GitHubUr
         <div className="rounded-lg border bg-muted/30 p-4">
           <div className="mb-2 flex items-center gap-2 text-sm font-medium">
             <FileText className="h-4 w-4" />
-            File Tree Preview ({Math.min(10, sourceData.fileTree.length)} of {sourceData.fileTree.length})
+            File Tree Preview ({Math.min(
+              10,
+              sourceData.fileTree.length,
+            )} of {sourceData.fileTree.length})
           </div>
           <div className="max-h-40 overflow-y-auto rounded bg-background p-2 font-mono text-xs">
             {sourceData.fileTree.slice(0, 10).map((file, i) => (
@@ -96,7 +110,8 @@ export function GitHubUrlInput({ sourceData, onSourceLoaded, onError }: GitHubUr
         {/* Next steps hint */}
         <div className="rounded-lg border border-blue-500/50 bg-blue-500/10 p-3">
           <p className="text-xs text-blue-700">
-            <strong>Next step:</strong> Review the templates below, then scroll down and click "Evaluate" to start the AI evaluation.
+            <strong>Next step:</strong> Review the templates below, then scroll
+            down and click "Evaluate" to start the AI evaluation.
           </p>
         </div>
       </div>
@@ -116,7 +131,11 @@ export function GitHubUrlInput({ sourceData, onSourceLoaded, onError }: GitHubUr
           onKeyDown={(e) => e.key === "Enter" && handleFetch()}
         />
       </div>
-      <Button onClick={handleFetch} disabled={loading || !url.trim()}>
+      <Button
+        onClick={handleFetch}
+        disabled={loading || !url.trim()}
+        className="cursor-pointer"
+      >
         {loading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
