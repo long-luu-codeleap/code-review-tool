@@ -27,7 +27,7 @@ async function githubFetch(path: string, token?: string): Promise<Response> {
     Accept: "application/vnd.github.v3+json",
   };
   if (token) {
-    headers.Authorization = `Bearer ${token}`;
+    headers.Authorization = `token ${token}`;
   }
   return fetch(`https://api.github.com${path}`, { headers });
 }
@@ -89,7 +89,7 @@ export async function fetchGitHubRepo(
           const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${file.path}`;
           const headers: Record<string, string> = {};
           if (token) {
-            headers.Authorization = `Bearer ${token}`;
+            headers.Authorization = `token ${token}`;
           }
           const res = await fetch(rawUrl, { headers });
           if (!res.ok) return null;
@@ -110,6 +110,7 @@ export async function fetchGitHubRepo(
   return {
     sourceCode: formatSourceCode(files),
     fileTree,
+    loadMethod: "github" as const,
     repoInfo: { owner, repo, branch },
   };
 }

@@ -51,5 +51,6 @@ export async function parseZipFile(file: File): Promise<SourceData> {
   return {
     sourceCode: formatSourceCode(files),
     fileTree: fileTree.sort(),
+    loadMethod: "folder" as const,
   };
 }

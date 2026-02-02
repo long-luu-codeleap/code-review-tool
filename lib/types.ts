@@ -6,6 +6,7 @@ export interface FileEntry {
 export interface SourceData {
   sourceCode: string;
   fileTree: string[];
+  loadMethod: "github" | "folder";
   repoInfo?: {
     owner: string;
     repo: string;

@@ -24,12 +24,32 @@ Note: This project uses Bun as the package manager (see `bun.lock`).
 
 ## Environment Setup
 
-Required environment variables (see `.env.example`):
+Environment variables (see `.env.example`):
 
-- `GOOGLE_API_KEY` - **Required**. Get free API key from <https://aistudio.google.com>
+- `GROQ_API_KEY` - **Recommended**. Free API key from <https://console.groq.com> (much higher rate limits than Gemini!)
+- `GOOGLE_API_KEY` - **Required as fallback**. Get free API key from <https://aistudio.google.com>
 - `GITHUB_TOKEN` - Optional. Increases GitHub API rate limits from 60/hr to 5000/hr
 
+**Note:** The app will try Groq first (if configured), then fall back to Gemini if Groq fails or is not configured.
+
 ## Architecture
+
+### AI Provider System
+
+The app supports multiple AI providers with automatic fallback (`lib/ai/gemini-client.ts`):
+
+1. **Primary: Groq** (if `GROQ_API_KEY` is set)
+   - Free tier with high rate limits (30 req/min, 6K tokens/min)
+   - Uses Llama 3.3 70B model
+   - Very fast inference (specialized hardware)
+   - Client: `lib/ai/groq-client.ts`
+
+2. **Fallback: Google Gemini** (if Groq fails or not configured)
+   - Free tier with lower rate limits
+   - Uses gemini-2.5-flash model
+   - Auto-retry with exponential backoff for 503/429 errors
+
+The system automatically tries Groq first, then falls back to Gemini if Groq is unavailable or fails.
 
 ### Evaluation Pipeline (3-Pass System)
 
