@@ -34,7 +34,7 @@ export function TemplateEditor({
     <Card>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CardHeader className="pb-3">
-          <CollapsibleTrigger className="flex w-full cursor-pointer items-center justify-between">
+          <CollapsibleTrigger className="flex w-full cursor-pointer items-center justify-between py-2 px-4 rounded-lg">
             <div className="flex flex-col items-start gap-1">
               <CardTitle className="flex items-center gap-2 text-lg">
                 {icon}
