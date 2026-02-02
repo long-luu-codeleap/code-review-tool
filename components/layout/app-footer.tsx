@@ -24,7 +24,7 @@ export function AppFooter() {
             <span>© 2026 Long Luu</span>
             <span>•</span>
             <Link
-              href="https://github.com/yourusername/code-eval"
+              href="https://github.com/long-luu-codeleap/code-review-tool"
               className="hover:text-foreground"
               target="_blank"
               rel="noopener noreferrer"

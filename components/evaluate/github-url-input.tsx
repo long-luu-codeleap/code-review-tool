@@ -111,7 +111,7 @@ export function GitHubUrlInput({
         <div className="rounded-lg border border-blue-500/50 bg-blue-500/10 p-3">
           <p className="text-xs text-blue-700">
             <strong>Next step:</strong> Review the templates below, then scroll
-            down and click "Evaluate" to start the AI evaluation.
+            down and click &quot;Evaluate&quot; to start the AI evaluation.
           </p>
         </div>
       </div>
