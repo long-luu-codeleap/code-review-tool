@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CodeEval - AI-Powered Code Evaluation
+
+A modern Next.js application that automates code assignment evaluation for technical hiring. Uses a 3-pass AI evaluation pipeline powered by Groq (Llama 3.3 70B) or Google Gemini to assess code structure, requirement fulfillment, and overall quality.
+
+![CodeEval Screenshot](https://img.shields.io/badge/Next.js-16-black?logo=next.js) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwindcss)
+
+## Features
+
+- 🔍 **3-Pass AI Evaluation** - Structure scan, requirement review, and final scoring
+- 🌙 **Dark/Light Mode** - Glassmorphic UI with smooth theme transitions
+- 📂 **Multiple Input Methods** - GitHub URL or local folder upload
+- 📊 **Detailed Reports** - Section scores, key takeaways, and markdown export
+- 🖨️ **Export Options** - Copy, Markdown download, and Print PDF
+- ⚡ **Fast Inference** - Groq primary (Llama 3.3 70B) with Gemini fallback
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- [Bun](https://bun.sh) (package manager)
+- API Keys (at least one required):
+  - [Groq API Key](https://console.groq.com) (recommended - free, high rate limits)
+  - [Google AI Studio API Key](https://aistudio.google.com) (fallback)
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+# Clone the repository
+git clone https://github.com/yourusername/code-eval.git
+cd code-eval
+
+# Install dependencies
+bun install
+
+# Copy environment variables
+cp .env.example .env
+
+# Add your API keys to .env
+# GROQ_API_KEY=your_groq_key
+# GOOGLE_API_KEY=your_google_key
+# GITHUB_TOKEN=your_github_token (optional, increases rate limits)
+
+# Start development server
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to use the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable         | Required    | Description                                             |
+| ---------------- | ----------- | ------------------------------------------------------- |
+| `GROQ_API_KEY`   | Recommended | Groq API key for Llama 3.3 70B (free, high rate limits) |
+| `GOOGLE_API_KEY` | Fallback    | Google AI API key for Gemini (free tier)                |
+| `GITHUB_TOKEN`   | Optional    | GitHub token for higher API rate limits (60→5000/hr)    |
 
-## Learn More
+## Usage
 
-To learn more about Next.js, take a look at the following resources:
+1. **Provide Source Code** - Enter a GitHub repository URL or upload a local folder
+2. **Customize Templates** - Edit requirement and result templates as needed
+3. **Run Evaluation** - Click "Evaluate" to start the 3-pass analysis
+4. **Review Results** - View detailed scores, feedback, and export the report
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript 5
+- **Styling:** Tailwind CSS v4 + shadcn/ui
+- **AI Providers:** Groq (Llama 3.3 70B) / Google Gemini
+- **Package Manager:** Bun
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+├── app/                    # Next.js App Router pages
+│   ├── api/               # API routes (evaluate, github)
+│   ├── evaluate/          # Evaluation form page
+│   └── results/           # Results display page
+├── components/            # React components
+│   ├── evaluate/          # Evaluation form components
+│   ├── layout/            # Header, footer, theme toggle
+│   ├── results/           # Report display components
+│   └── ui/                # shadcn/ui primitives
+├── lib/                   # Core logic
+│   ├── ai/                # AI clients and prompts
+│   ├── github/            # GitHub API integration
+│   ├── hooks/             # React hooks
+│   ├── parsers/           # File parsing utilities
+│   └── templates/         # Default templates
+├── public/                # Static assets
+└── docs/                  # Documentation and plans
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Development
+
+```bash
+bun dev          # Start development server
+bun run build    # Build for production
+bun start        # Start production server
+bun run lint     # Run ESLint
+```
+
+## License
+
+MIT © Long Luu
