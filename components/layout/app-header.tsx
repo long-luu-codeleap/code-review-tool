@@ -9,7 +9,7 @@ export function AppHeader() {
       <div className="container mx-auto flex h-14 items-center px-4">
         <Link
           href="/evaluate"
-          className="flex items-center gap-2 font-semibold"
+          className="flex items-center gap-2 font-semibold transition-opacity hover:opacity-80"
         >
           <Image
             src="/logo.svg"
