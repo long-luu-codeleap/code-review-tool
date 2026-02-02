@@ -5,9 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FileCode, CheckCircle2 } from "lucide-react";
 import { GitHubUrlInput } from "./github-url-input";
-import { ZipUploadInput } from "./zip-upload-input";
 import { FolderUploadInput } from "./folder-upload-input";
-import { CodePasteInput } from "./code-paste-input";
 import type { SourceData } from "@/lib/types";
 
 interface SourceInputProps {
@@ -41,21 +39,13 @@ export function SourceInput({
         <Tabs defaultValue="github">
           <TabsList className="mb-4 w-full justify-start">
             <TabsTrigger value="github">GitHub</TabsTrigger>
-            <TabsTrigger value="zip">ZIP Upload</TabsTrigger>
             <TabsTrigger value="folder">Folder</TabsTrigger>
-            <TabsTrigger value="paste">Paste</TabsTrigger>
           </TabsList>
           <TabsContent value="github">
             <GitHubUrlInput onSourceLoaded={onSourceLoaded} onError={onError} />
           </TabsContent>
-          <TabsContent value="zip">
-            <ZipUploadInput onSourceLoaded={onSourceLoaded} onError={onError} />
-          </TabsContent>
           <TabsContent value="folder">
             <FolderUploadInput onSourceLoaded={onSourceLoaded} onError={onError} />
-          </TabsContent>
-          <TabsContent value="paste">
-            <CodePasteInput onSourceLoaded={onSourceLoaded} onError={onError} />
           </TabsContent>
         </Tabs>
       </CardContent>
