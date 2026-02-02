@@ -16,7 +16,7 @@ export function AppHeader() {
             alt="CodeLeap Logo"
             width={200}
             height={200}
-            className="dark:brightness-200 dark:contrast-125 dark:[text-shadow:0_0_20px_rgba(99,102,241,0.3)]"
+            className="transition-all dark:brightness-200 dark:contrast-125 dark:drop-shadow-[0_0_20px_rgba(99,102,241,0.3)]"
           />
         </Link>
         <nav className="ml-8 flex items-center gap-4 text-sm">
