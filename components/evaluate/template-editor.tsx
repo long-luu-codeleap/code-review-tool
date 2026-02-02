@@ -13,6 +13,7 @@ import {
 
 interface TemplateEditorProps {
   title: string;
+  description?: string;
   icon: React.ReactNode;
   value: string;
   defaultValue: string;
@@ -21,6 +22,7 @@ interface TemplateEditorProps {
 
 export function TemplateEditor({
   title,
+  description,
   icon,
   value,
   defaultValue,
@@ -32,11 +34,16 @@ export function TemplateEditor({
     <Card>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CardHeader className="pb-3">
-          <CollapsibleTrigger className="flex w-full items-center justify-between cursor-pointer">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              {icon}
-              {title}
-            </CardTitle>
+          <CollapsibleTrigger className="flex w-full cursor-pointer items-center justify-between">
+            <div className="flex flex-col items-start gap-1">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                {icon}
+                {title}
+              </CardTitle>
+              {description && (
+                <p className="text-xs text-muted-foreground">{description}</p>
+              )}
+            </div>
             <ChevronDown
               className={`h-4 w-4 text-muted-foreground transition-transform ${
                 isOpen ? "rotate-180" : ""

@@ -1,8 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ClipboardCheck, FileText, Play, AlertCircle } from "lucide-react";
+import {
+  ClipboardCheck,
+  FileText,
+  Play,
+  AlertCircle,
+  HelpCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { SourceInput } from "./source-input";
 import { TemplateEditor } from "./template-editor";
@@ -46,7 +53,7 @@ export function EvaluationForm() {
       <div>
         <h1 className="text-2xl font-bold">Evaluate Assignment</h1>
         <p className="text-muted-foreground">
-          Upload or paste candidate code for AI-powered evaluation
+          AI-powered code assessment for technical hiring
         </p>
       </div>
 
@@ -58,6 +65,7 @@ export function EvaluationForm() {
 
       <TemplateEditor
         title="Requirement Template"
+        description="Defines the assessment criteria and features to evaluate. Customize this to match your job requirements."
         icon={<ClipboardCheck className="h-5 w-5" />}
         value={requirementTemplate}
         defaultValue={DEFAULT_REQUIREMENT_TEMPLATE}
@@ -66,6 +74,7 @@ export function EvaluationForm() {
 
       <TemplateEditor
         title="Result Template"
+        description="Shapes the format of the evaluation report. Modify sections to focus on what matters most to your team."
         icon={<FileText className="h-5 w-5" />}
         value={resultTemplate}
         defaultValue={DEFAULT_RESULT_TEMPLATE}
