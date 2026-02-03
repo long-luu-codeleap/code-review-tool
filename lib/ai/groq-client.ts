@@ -36,3 +36,11 @@ export async function generateContentWithGroq(
 export function isGroqAvailable(): boolean {
   return !!process.env.GROQ_API_KEY;
 }
+
+// Alias for provider manager compatibility
+export async function generateWithGroq(
+  systemPrompt: string,
+  userPrompt: string
+): Promise<string> {
+  return generateContentWithGroq(systemPrompt, userPrompt);
+}
