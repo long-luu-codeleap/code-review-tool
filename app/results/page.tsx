@@ -1,30 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileQuestion } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EvaluationReport } from "@/components/results/evaluation-report";
+import { ErrorBoundary } from "@/components/error-boundary";
 import type { EvaluationResult } from "@/lib/types";
 
 export default function ResultsPage() {
   const router = useRouter();
-  const [result, setResult] = useState<EvaluationResult | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const [result] = useState<EvaluationResult | null>(() => {
+    if (typeof window === "undefined") return null;
 
-  useEffect(() => {
     try {
       const stored = sessionStorage.getItem("evaluationResult");
-      if (stored) {
-        setResult(JSON.parse(stored));
-      }
+      return stored ? JSON.parse(stored) : null;
     } catch {
-      // Invalid data in session storage
+      return null;
     }
-    setLoaded(true);
-  }, []);
-
-  if (!loaded) return null;
+  });
 
   if (!result) {
     return (
@@ -39,5 +34,9 @@ export default function ResultsPage() {
     );
   }
 
-  return <EvaluationReport result={result} />;
+  return (
+    <ErrorBoundary>
+      <EvaluationReport result={result} />
+    </ErrorBoundary>
+  );
 }

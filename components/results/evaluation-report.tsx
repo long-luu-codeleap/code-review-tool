@@ -8,6 +8,11 @@ import { ScoreSummary } from "./score-summary";
 import { RequirementCard } from "./requirement-card";
 import { RecommendationBadge } from "./recommendation-badge";
 import { ExportToolbar } from "./export-toolbar";
+import { ErrorBoundary } from "@/components/error-boundary";
+import {
+  MarkdownErrorFallback,
+  RequirementErrorFallback,
+} from "@/components/fallbacks";
 import type { EvaluationResult } from "@/lib/types";
 
 interface EvaluationReportProps {
@@ -56,16 +61,18 @@ export function EvaluationReport({ result }: EvaluationReportProps) {
         </div>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Detailed Report</CardTitle>
-            </CardHeader>
-            <CardContent className="prose prose-sm max-w-none dark:prose-invert">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {pass3.markdownReport}
-              </ReactMarkdown>
-            </CardContent>
-          </Card>
+          <ErrorBoundary fallback={MarkdownErrorFallback}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Detailed Report</CardTitle>
+              </CardHeader>
+              <CardContent className="prose prose-sm max-w-none dark:prose-invert">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {pass3.markdownReport}
+                </ReactMarkdown>
+              </CardContent>
+            </Card>
+          </ErrorBoundary>
         </div>
       </div>
 
@@ -75,7 +82,9 @@ export function EvaluationReport({ result }: EvaluationReportProps) {
         <h2 className="mb-4 text-xl font-semibold">Requirement Breakdown</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {pass2.requirements.map((req, i) => (
-            <RequirementCard key={i} data={req} />
+            <ErrorBoundary key={i} fallback={RequirementErrorFallback}>
+              <RequirementCard data={req} />
+            </ErrorBoundary>
           ))}
         </div>
       </div>
