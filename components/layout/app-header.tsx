@@ -60,7 +60,7 @@ export function AppHeader() {
       {/* Help Modal */}
       {showHelp && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4 cursor-pointer"
           onClick={() => setShowHelp(false)}
         >
           <div
@@ -102,7 +102,7 @@ export function AppHeader() {
 
               <div>
                 <h3 className="mb-2 font-medium text-primary">
-                  Step 2: Review Templates (Optional)
+                  Step 2: Review Templates
                 </h3>
                 <p className="text-muted-foreground">
                   Click on the template cards to expand and customize:
