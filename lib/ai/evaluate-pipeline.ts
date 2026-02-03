@@ -1,4 +1,5 @@
 import { generateWithFallback } from "./provider-manager";
+import { prepareSourceCode } from "@/lib/utils/source-compression";
 import { validatePass1, validatePass2, validatePass3 } from "./validators";
 import type { AIProvider } from "./types";
 import {
@@ -212,11 +213,14 @@ IMPORTANT: Previous response had quality issues. Please retry with:
 export async function runEvaluation(
   input: EvaluationInput,
 ): Promise<EvaluationResult> {
+  const processedSourceCode = prepareSourceCode(input.sourceCode);
+  console.log(`Source: ${input.sourceCode.length} → ${processedSourceCode.length} chars`);
+
   // Pass 1: Structure Scan
   const pass1Result = await generateWithRetry<Pass1Output>(
     1,
     SYSTEM_PROMPT,
-    buildPass1Prompt(input.sourceCode),
+    buildPass1Prompt(processedSourceCode),
     validatePass1,
     "Pass 1 (Structure Scan)",
     { preferredProvider: "claude" }
@@ -229,7 +233,7 @@ export async function runEvaluation(
     2,
     SYSTEM_PROMPT,
     buildPass2Prompt(
-      input.sourceCode,
+      processedSourceCode,
       input.requirementTemplate,
       JSON.stringify(pass1, null, 2)
     ),
