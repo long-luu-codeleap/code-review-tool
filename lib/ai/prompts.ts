@@ -13,8 +13,10 @@ IMPORTANT: When asked to return JSON, return ONLY valid JSON with no markdown fo
 JSON FORMATTING RULES:
 - Always escape special characters in strings: backslashes (\\), quotes (\"), newlines (\\n)
 - File paths must use forward slashes or escaped backslashes: "src/components/App.tsx" or "C:\\\\Users\\\\..."
-- Never include unescaped quotes within string values
-- Use double quotes for all JSON keys and string values, never single quotes`;
+- **CRITICAL**: Never include unescaped quotes within string values. If you need to mention quoted text like "thoroughly tested", you MUST escape the quotes: \"thoroughly tested\"
+- Use double quotes for all JSON keys and string values, never single quotes
+- Example of CORRECT escaping: "The code is \"well tested\" and production-ready"
+- Example of INCORRECT (will break): "The code is "well tested" and production-ready"`;
 
 export function buildPass1Prompt(sourceCode: string): string {
   return `Analyze the structure and quality of this code submission. Review the following aspects and provide a score from 1-10 for each, along with specific evidence from the code.

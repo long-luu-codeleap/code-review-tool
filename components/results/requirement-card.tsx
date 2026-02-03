@@ -31,7 +31,9 @@ const statusConfig = {
 };
 
 export function RequirementCard({ data }: RequirementCardProps) {
-  const config = statusConfig[data.status];
+  // Defensive: handle unexpected status values from AI
+  const normalizedStatus = (data.status || "fail").toLowerCase().trim() as keyof typeof statusConfig;
+  const config = statusConfig[normalizedStatus] || statusConfig.fail;
   const Icon = config.icon;
 
   return (

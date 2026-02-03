@@ -13,6 +13,22 @@ import type {
   Pass3Output,
 } from "@/lib/types";
 
+function normalizeStatus(
+  status: string,
+): "pass" | "partial" | "fail" {
+  // Normalize status values from AI responses to expected values
+  const normalized = (status || "fail").toLowerCase().trim();
+
+  if (normalized === "pass" || normalized === "passed" || normalized === "passing") {
+    return "pass";
+  }
+  if (normalized === "partial" || normalized === "partially" || normalized === "partial pass") {
+    return "partial";
+  }
+  // Default to fail for any unexpected values
+  return "fail";
+}
+
 function cleanJsonResponse(text: string): string {
   // Remove markdown code fences if present
   let cleaned = text.trim();
@@ -40,13 +56,76 @@ function cleanJsonResponse(text: string): string {
 
 function attemptJsonRepair(jsonString: string): string {
   // Attempt to fix common JSON formatting issues from AI responses
-  let repaired = jsonString;
 
-  // Fix unescaped backslashes in Windows paths
-  // Convert single backslashes to double backslashes (except for valid escape sequences)
-  repaired = repaired.replace(/\\(?!["\\/bfnrtu])/g, "\\\\");
+  // Step 1: Fix unescaped backslashes in Windows paths
+  // Convert single backslashes to double backslashes (except for valid JSON escape sequences)
+  // Valid sequences: \" \\ \/ \b \f \n \r \t \u (hence the regex: bfnrtu)
+  const repaired = jsonString.replace(/\\(?!["\\/bfnrtu])/g, "\\\\");
 
-  return repaired;
+  // Step 2: Fix unescaped quotes within string values using a state machine
+  // This is a common issue with AI-generated JSON where quotes appear in text like "thoroughly tested"
+  let result = "";
+  let inString = false;
+  let escapeNext = false;
+
+  for (let i = 0; i < repaired.length; i++) {
+    const char = repaired[i];
+
+    // Handle escape sequences
+    if (escapeNext) {
+      result += char;
+      escapeNext = false;
+      continue;
+    }
+
+    if (char === "\\") {
+      result += char;
+      escapeNext = true;
+      continue;
+    }
+
+    // Handle quotes
+    if (char === '"') {
+      if (!inString) {
+        // Starting a new string
+        inString = true;
+        result += char;
+      } else {
+        // We're inside a string - determine if this is the closing quote or an embedded quote
+        // Look ahead past any whitespace to find the next meaningful character
+        let lookaheadPos = i + 1;
+        while (
+          lookaheadPos < repaired.length &&
+          /\s/.test(repaired[lookaheadPos])
+        ) {
+          lookaheadPos++;
+        }
+        const nextMeaningfulChar =
+          lookaheadPos < repaired.length ? repaired[lookaheadPos] : "";
+
+        // A closing quote should be followed (possibly with whitespace) by: , : } ] or end
+        const isClosingQuote =
+          nextMeaningfulChar === "," ||
+          nextMeaningfulChar === ":" ||
+          nextMeaningfulChar === "}" ||
+          nextMeaningfulChar === "]" ||
+          nextMeaningfulChar === "";
+
+        if (isClosingQuote) {
+          // This is the string delimiter - close the string
+          inString = false;
+          result += char;
+        } else {
+          // This quote is inside the string content - escape it
+          result += "\\" + char;
+        }
+      }
+    } else {
+      result += char;
+    }
+  }
+
+  return result;
 }
 
 function parseJsonWithContext<T>(jsonString: string, context: string): T {
@@ -57,8 +136,8 @@ function parseJsonWithContext<T>(jsonString: string, context: string): T {
     try {
       const repaired = attemptJsonRepair(jsonString);
       return JSON.parse(repaired) as T;
-    } catch {
-      // Repair failed, provide detailed error context
+    } catch (repairError) {
+      // Repair failed, provide detailed error context from the ORIGINAL error
       const errorMsg = error instanceof Error ? error.message : String(error);
       const match = errorMsg.match(/position (\d+)/);
 
@@ -69,9 +148,15 @@ function parseJsonWithContext<T>(jsonString: string, context: string): T {
         const snippet = jsonString.substring(start, end);
         const pointer = " ".repeat(Math.min(position - start, 100)) + "^";
 
+        // Also show a sample of the repaired JSON to help debug
+        const repairedSnippet =
+          repairError instanceof Error
+            ? `\nRepair attempt also failed: ${repairError.message}`
+            : "";
+
         throw new Error(
           `${context} - JSON parsing failed: ${errorMsg}\n\n` +
-            `Snippet near error:\n${snippet}\n${pointer}\n\n` +
+            `Snippet near error:\n${snippet}\n${pointer}${repairedSnippet}\n\n` +
             `This is likely an AI response formatting issue. Please retry the evaluation.`,
         );
       }
@@ -112,6 +197,17 @@ export async function runEvaluation(
     pass2Cleaned,
     "Pass 2 (Requirement Review)",
   );
+
+  // Validate and normalize Pass 2 data
+  pass2.requirements = pass2.requirements.map((req) => ({
+    ...req,
+    // Normalize status to one of the expected values
+    status: normalizeStatus(req.status),
+    // Ensure arrays are defined
+    positives: req.positives || [],
+    improvements: req.improvements || [],
+    evidence: req.evidence || [],
+  }));
 
   // Pass 3: Final Scoring
   const pass3Raw = await generateContent(
