@@ -11,12 +11,14 @@ Your evaluation philosophy:
 IMPORTANT: When asked to return JSON, return ONLY valid JSON with no markdown formatting, no code fences, and no additional text. The response must be parseable by JSON.parse().
 
 JSON FORMATTING RULES:
-- Always escape special characters in strings: backslashes (\\), quotes (\"), newlines (\\n)
-- File paths must use forward slashes or escaped backslashes: "src/components/App.tsx" or "C:\\\\Users\\\\..."
-- **CRITICAL**: Never include unescaped quotes within string values. If you need to mention quoted text like "thoroughly tested", you MUST escape the quotes: \"thoroughly tested\"
+- Always escape special characters in strings: backslashes (\\\\), quotes (\\"), newlines (\\n)
+- File paths must use forward slashes or escaped backslashes: "src/components/App.tsx" or "C:\\\\\\\\Users\\\\\\\\..."
+- **CRITICAL**: Never include single quotes, backticks, or unescaped quotes within string values. When mentioning code like API_CONFIG or sub_id, write them without any surrounding quotes or backticks.
 - Use double quotes for all JSON keys and string values, never single quotes
-- Example of CORRECT escaping: "The code is \"well tested\" and production-ready"
-- Example of INCORRECT (will break): "The code is "well tested" and production-ready"`;
+- Example of CORRECT: "The code uses the API_CONFIG variable for configuration"
+- Example of CORRECT: "The function references the sub_id field in the user object"
+- Example of INCORRECT: "The code uses 'API_CONFIG' for config" (has single quotes)
+- Example of INCORRECT: "The function uses \`sub_id\` field" (has backticks)`;
 
 export function buildPass1Prompt(sourceCode: string): string {
   return `Analyze the structure and quality of this code submission. Review the following aspects and provide a score from 1-10 for each, along with specific evidence from the code.
@@ -69,12 +71,30 @@ Evaluation guidelines:
 - "partial": Requirement partially implemented, has issues, or missing edge cases
 - "fail": Requirement not implemented or fundamentally broken
 
+EXAMPLES OF QUALITY FEEDBACK:
+
+❌ AVOID (too generic):
+- "Code quality needs improvement"
+- "Add more tests"
+- "Better error handling required"
+
+✅ PROVIDE (specific + actionable):
+- "The error boundary in App.tsx:23 doesn't catch async errors. Add try-catch in useEffect."
+- "Missing test for API 429 rate limit. Add test in api.test.ts."
+- "UserService (user-service.ts:45) violates Single Responsibility. Extract AuthService."
+
 For each requirement in the template, provide:
 - status: "pass", "partial", or "fail"
 - score: 1-10 (reflects implementation quality and completeness)
-- positives: specific things done well (with code evidence)
-- improvements: specific suggestions for improvement
-- evidence: file paths, function names, line references
+- positives: specific things done well WITH CODE EVIDENCE (min 2 items, 20+ chars each)
+- improvements: specific suggestions WITH FILE:LINE REFERENCES (min 2 items, 30+ chars each)
+- evidence: file paths, function names, line references (min 3 items with file:line format)
+
+YOUR RESPONSE MUST:
+1. Reference specific files and line numbers (e.g., "app.tsx:45")
+2. Quote actual code snippets as evidence
+3. Provide actionable next steps (not just "improve X")
+4. Avoid generic phrases without specifics
 
 Parse the requirements carefully - they may be in different formats:
 - User stories ("As a user, I want...")

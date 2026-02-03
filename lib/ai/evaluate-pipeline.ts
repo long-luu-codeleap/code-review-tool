@@ -1,4 +1,4 @@
-import { generateContent } from "./gemini-client";
+import { generateContent } from "@/lib/ai/gemini-client";
 import {
   SYSTEM_PROMPT,
   buildPass1Prompt,
@@ -13,16 +13,22 @@ import type {
   Pass3Output,
 } from "@/lib/types";
 
-function normalizeStatus(
-  status: string,
-): "pass" | "partial" | "fail" {
+function normalizeStatus(status: string): "pass" | "partial" | "fail" {
   // Normalize status values from AI responses to expected values
   const normalized = (status || "fail").toLowerCase().trim();
 
-  if (normalized === "pass" || normalized === "passed" || normalized === "passing") {
+  if (
+    normalized === "pass" ||
+    normalized === "passed" ||
+    normalized === "passing"
+  ) {
     return "pass";
   }
-  if (normalized === "partial" || normalized === "partially" || normalized === "partial pass") {
+  if (
+    normalized === "partial" ||
+    normalized === "partially" ||
+    normalized === "partial pass"
+  ) {
     return "partial";
   }
   // Default to fail for any unexpected values
@@ -57,12 +63,46 @@ function cleanJsonResponse(text: string): string {
 function attemptJsonRepair(jsonString: string): string {
   // Attempt to fix common JSON formatting issues from AI responses
 
+  let repaired = jsonString;
+
   // Step 1: Fix unescaped backslashes in Windows paths
   // Convert single backslashes to double backslashes (except for valid JSON escape sequences)
   // Valid sequences: \" \\ \/ \b \f \n \r \t \u (hence the regex: bfnrtu)
-  const repaired = jsonString.replace(/\\(?!["\\/bfnrtu])/g, "\\\\");
+  repaired = repaired.replace(/\\(?!["\\/bfnrtu])/g, "\\\\");
 
-  // Step 2: Fix unescaped quotes within string values using a state machine
+  // Step 2: Fix unquoted property names (common AI response issue)
+  // Match property names that are not quoted and quote them
+  repaired = repaired.replace(
+    /([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g,
+    '$1"$2":',
+  );
+
+  // Step 3: Fix missing commas between array elements and object properties
+  // Add comma between } and { (objects in array)
+  repaired = repaired.replace(/}\s*{/g, "},{");
+  // Add comma between ] and [ (arrays in array)
+  repaired = repaired.replace(/]\s*\[/g, "],[");
+  // Add comma between string/number and { (mixed array elements)
+  repaired = repaired.replace(/(["\d])\s*{/g, "$1,{");
+  // Add comma between } and string/number (mixed array elements)
+  repaired = repaired.replace(/}\s*(["\d])/g, "},$1");
+
+  // Step 4: Fix trailing commas
+  repaired = repaired.replace(/,\s*([}\]])/g, "$1");
+
+  // Step 5: Fix mixed content that might have leaked into JSON
+  // Remove any non-JSON content before the first { or [
+  const firstJsonChar = repaired.search(/[{\[]/);
+  if (firstJsonChar > 0) {
+    repaired = repaired.substring(firstJsonChar);
+  }
+
+  // Step 6: Fix mixed quote styles - replace backticks and single quotes with escaped doubles
+  // This handles cases like: `API_CONFIG` or 'sub_id' within string values
+  // Do this BEFORE the quote escaping logic to normalize all quote types
+  repaired = repaired.replace(/`([^`]+)`/g, '\\"$1\\"'); // `text` -> \"text\"
+
+  // Step 7: Fix unescaped quotes within string values using a state machine
   // This is a common issue with AI-generated JSON where quotes appear in text like "thoroughly tested"
   let result = "";
   let inString = false;
@@ -84,7 +124,20 @@ function attemptJsonRepair(jsonString: string): string {
       continue;
     }
 
-    // Handle quotes
+    // Handle single quotes within strings (convert to escaped doubles)
+    if (char === "'") {
+      if (inString) {
+        // Single quote inside a string - convert to escaped double quote
+        result += '\\"';
+      } else {
+        // Single quote as delimiter (shouldn't happen in valid JSON, but handle it)
+        result += '"';
+        inString = true;
+      }
+      continue;
+    }
+
+    // Handle double quotes
     if (char === '"') {
       if (!inString) {
         // Starting a new string

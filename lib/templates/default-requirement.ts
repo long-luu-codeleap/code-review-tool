@@ -67,6 +67,16 @@ This section introduces additional expectations for this assessment that are not
   - Instructions for setting up the project
   - Reasons for selecting certain libraries over others
   - Explanations of other technical decisions, as necessary
+- As a technical reviewer, I expect proper security practices:
+  - Environment files (.env, .env.local) are in .gitignore
+  - No API keys, secrets, or credentials hardcoded in source code
+  - Sensitive values are properly configured via environment variables
+  - .env.example file provided with placeholder values (not real secrets)
+- As a technical reviewer, I expect robust error handling:
+  - API errors are caught and handled gracefully
+  - User-friendly error messages are displayed (not raw error dumps)
+  - Network failures don't crash the application
+  - Loading and error states are properly managed
 
 ### Bonus
 
@@ -85,6 +95,12 @@ We encourage you to focus on quality over quantity. It is better to do less work
   - Making an API call to get votes
 - As a user, I can filter between my likes, dislikes, and super likes, based on the functionality mentioned above
 - As a developer, I may add any feature I consider meaningful for the project, whether it be technical or business-oriented
+- As a technical reviewer, I appreciate proper accessibility:
+  - Semantic HTML elements used appropriately (button, nav, main, etc.)
+  - ARIA labels and attributes where needed (aria-label, role, etc.)
+  - Keyboard navigation works for interactive elements
+  - Images have meaningful alt text
+  - Color contrast meets WCAG standards
 
 ---
 
