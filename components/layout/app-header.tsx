@@ -45,11 +45,11 @@ export function AppHeader() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 cursor-pointer"
+              className="h-9 w-9 cursor-pointer hover:scale-110 transition-transform animate-pulse"
               onClick={() => setShowHelp(true)}
               title="How to use"
             >
-              <HelpCircle className="h-4 w-4" />
+              <HelpCircle className="h-4 w-4 animate-bounce" />
               <span className="sr-only">Help</span>
             </Button>
             <ThemeToggle />
@@ -70,7 +70,7 @@ export function AppHeader() {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-2 top-2 h-8 w-8"
+              className="absolute right-2 top-2 h-8 w-8 cursor-pointer"
               onClick={() => setShowHelp(false)}
             >
               <X className="h-4 w-4" />
