@@ -55,3 +55,7 @@ export const GEMINI_MODEL = "gemini-2.5-flash";
 // Groq model - free tier with high rate limits
 // Options: "llama-3.3-70b-versatile", "llama-3.1-70b-versatile", "mixtral-8x7b-32768"
 export const GROQ_MODEL = "llama-3.3-70b-versatile";
+
+// Claude Models
+export const CLAUDE_MODEL = "claude-3-5-sonnet-20241022" as const;
+export const CLAUDE_MAX_TOKENS = 8192 as const;
