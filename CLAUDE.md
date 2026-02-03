@@ -145,3 +145,18 @@ The pipeline includes robust JSON parsing (`cleanJsonResponse` in `evaluate-pipe
 - Strips markdown code fences from AI responses
 - Pass 3 uses delimiter `---JSON_DATA---` to separate markdown report from JSON
 - Includes fallback parsing if delimiter is missing
+
+### AI Providers (Priority Order)
+
+1. **`ANTHROPIC_API_KEY`** - **Recommended**. Claude API key from <https://console.anthropic.com>
+   - Highest quality evaluations
+   - ~$0.15-0.30 per evaluation
+   - Pass 3 (final report) requires Claude for maximum quality
+
+2. **`GROQ_API_KEY`** - **Recommended as fallback**. Free from <https://console.groq.com>
+   - Free tier with high rate limits
+   - Automatic fallback if Claude fails
+
+3. **`GOOGLE_API_KEY`** - **Final fallback**. Free from <https://aistudio.google.com>
+
+**Note:** App tries providers in order: Claude → Groq → Gemini
