@@ -1,4 +1,6 @@
-import { generateContent } from "./gemini-client";
+import { generateWithFallback } from "./provider-manager";
+import { validatePass1, validatePass2, validatePass3 } from "./validators";
+import type { AIProvider } from "./types";
 import {
   SYSTEM_PROMPT,
   buildPass1Prompt,
@@ -169,55 +171,95 @@ function parseJsonWithContext<T>(jsonString: string, context: string): T {
   }
 }
 
+
+async function generateWithRetry<T>(
+  passNumber: number,
+  systemPrompt: string,
+  userPrompt: string,
+  validator: (output: T) => { valid: boolean; issues: string[] },
+  parseContext: string,
+  options: {
+    allowedProviders?: AIProvider[];
+    preferredProvider?: AIProvider;
+  } = {}
+): Promise<{ data: T; provider: AIProvider }> {
+  let result = await generateWithFallback(systemPrompt, userPrompt, options);
+  let cleaned = cleanJsonResponse(result.content);
+  let parsed = parseJsonWithContext<T>(cleaned, parseContext);
+  let validation = validator(parsed);
+
+  if (validation.valid) {
+    return { data: parsed, provider: result.provider };
+  }
+
+  console.warn(`Pass ${passNumber} validation failed, retrying...`);
+
+  const enhancedPrompt = userPrompt + `
+
+IMPORTANT: Previous response had quality issues. Please retry with:
+1. Specific file:line references
+2. Concrete code examples
+3. Actionable advice
+4. NO generic phrases`;
+
+  result = await generateWithFallback(systemPrompt, enhancedPrompt, options);
+  cleaned = cleanJsonResponse(result.content);
+  parsed = parseJsonWithContext<T>(cleaned, parseContext + " (retry)");
+
+  return { data: parsed, provider: result.provider };
+}
+
 export async function runEvaluation(
   input: EvaluationInput,
 ): Promise<EvaluationResult> {
   // Pass 1: Structure Scan
-  const pass1Raw = await generateContent(
+  const pass1Result = await generateWithRetry<Pass1Output>(
+    1,
     SYSTEM_PROMPT,
     buildPass1Prompt(input.sourceCode),
-  );
-  const pass1Cleaned = cleanJsonResponse(pass1Raw);
-  const pass1 = parseJsonWithContext<Pass1Output>(
-    pass1Cleaned,
+    validatePass1,
     "Pass 1 (Structure Scan)",
+    { preferredProvider: "claude" }
   );
+  const pass1 = pass1Result.data;
+  console.log("Pass 1 done with " + pass1Result.provider);
 
   // Pass 2: Requirement Review
-  const pass2Raw = await generateContent(
+  const pass2Result = await generateWithRetry<Pass2Output>(
+    2,
     SYSTEM_PROMPT,
     buildPass2Prompt(
       input.sourceCode,
       input.requirementTemplate,
-      JSON.stringify(pass1, null, 2),
+      JSON.stringify(pass1, null, 2)
     ),
-  );
-  const pass2Cleaned = cleanJsonResponse(pass2Raw);
-  const pass2 = parseJsonWithContext<Pass2Output>(
-    pass2Cleaned,
+    validatePass2,
     "Pass 2 (Requirement Review)",
+    { preferredProvider: "claude" }
   );
+  const pass2 = pass2Result.data;
+  console.log("Pass 2 done with " + pass2Result.provider);
 
-  // Validate and normalize Pass 2 data
   pass2.requirements = pass2.requirements.map((req) => ({
     ...req,
-    // Normalize status to one of the expected values
     status: normalizeStatus(req.status),
-    // Ensure arrays are defined
     positives: req.positives || [],
     improvements: req.improvements || [],
     evidence: req.evidence || [],
   }));
 
-  // Pass 3: Final Scoring
-  const pass3Raw = await generateContent(
+  // Pass 3: Final Scoring (Claude ONLY)
+  const pass3RawResult = await generateWithFallback(
     SYSTEM_PROMPT,
     buildPass3Prompt(
       JSON.stringify(pass1, null, 2),
       JSON.stringify(pass2, null, 2),
-      input.resultTemplate,
+      input.resultTemplate
     ),
+    { allowedProviders: ["claude"] }
   );
+  console.log("Pass 3 done with " + pass3RawResult.provider);
+  const pass3Raw = pass3RawResult.content;
 
   // Split markdown and JSON
   const delimiter = "---JSON_DATA---";
