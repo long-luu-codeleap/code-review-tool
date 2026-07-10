@@ -46,6 +46,16 @@ export async function fetchGitHubRepo(
         "Repository not found or is private. Please ask the candidate to make the repo public or provide a ZIP file instead."
       );
     }
+    if (repoRes.status === 401) {
+      throw new Error(
+        "GitHub authentication failed (401). The GITHUB_TOKEN is missing, expired, or invalid. Update GITHUB_TOKEN in your .env with a valid token, or remove it to use unauthenticated access for public repos."
+      );
+    }
+    if (repoRes.status === 403) {
+      throw new Error(
+        "GitHub API rate limit exceeded or access forbidden (403). Add a valid GITHUB_TOKEN in your .env to increase rate limits."
+      );
+    }
     throw new Error(`GitHub API error: ${repoRes.status} ${repoRes.statusText}`);
   }
 
